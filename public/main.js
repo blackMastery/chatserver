@@ -19,10 +19,7 @@ $(function() {
      
   };
   
-  const SOCKET_ENVENTS = {
-     CONNECTION: 'connection',
-     DISCONNECTION: 'disconnection'
-  }
+
 
 const socket = io();
 const inboxPeople = document.querySelector(".inbox__people");
@@ -31,7 +28,11 @@ let userName = "";
 
 const newUserConnected = (user) => {
   userName = user || `User${Math.floor(Math.random() * 1000000)}`;
-  socket.emit("new user", userName);
+
+
+  socket.auth = { username:userName };
+  socket.connect();
+  socket.emit(BC_EVENTS.NEW_USER, userName);
   addToUsersBox(userName);
 };
 
@@ -50,6 +51,18 @@ const addToUsersBox = (userName) => {
 
 // new user is created so we generate nickname and emit event
 newUserConnected();
+
+
+
+socket.on("connect_error", (err) => {
+
+  console.log(err);
+  // if (err.message === "invalid username") {
+  //   this.usernameAlreadySelected = false;
+  // }
+});
+
+// socket.off("connect_error");
 
 
 socket.on(INCOMMING_EVENTS.NEW_USER, function (data) {
