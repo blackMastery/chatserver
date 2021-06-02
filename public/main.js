@@ -1,5 +1,29 @@
 $(function() {
 
+
+  const INCOMMING_EVENTS = {
+    NEW_USER: 'NEW_USER',
+    CHAT_MESSAGE: 'CHAT_MESSAGE',
+    TYPING: 'TYPING'
+  };
+  
+  
+  const BC_EVENTS = {
+    NEW_USER: 'NEW_USER',
+    USER_DISCONNECTED: 'USER_DISCONNECTED',
+  
+  };
+  const OUTGOING_EVENTS = {
+    CHAT_MESSAGE: 'CHAT_MESSAGE',
+    TYPING: 'TYPING'
+     
+  };
+  
+  const SOCKET_ENVENTS = {
+     CONNECTION: 'connection',
+     DISCONNECTION: 'disconnection'
+  }
+
 const socket = io();
 const inboxPeople = document.querySelector(".inbox__people");
 
@@ -28,11 +52,11 @@ const addToUsersBox = (userName) => {
 newUserConnected();
 
 
-socket.on("new user", function (data) {
+socket.on(INCOMMING_EVENTS.NEW_USER, function (data) {
     data.map((user) => addToUsersBox(user));
   });
   
-  socket.on("user disconnected", function (userName) {
+  socket.on(BC_EVENTS.USER_DISCONNECTED, function (userName) {
     document.querySelector(`.${userName}-userlist`).remove();
   });
 
@@ -78,27 +102,34 @@ messageForm.addEventListener("submit", (e) => {
     return;
   }
 
-  socket.emit("chat message", {
+  socket.emit(OUTGOING_EVENTS.CHAT_MESSAGE, {
     message: inputField.value,
     nick: userName,
   });
 
   inputField.value = "";
+
+  socket.emit(OUTGOING_EVENTS.TYPING, {
+    isTyping: inputField.value.length > 0,
+    nick: userName,
+  });
+
 });
 
-socket.on("chat message", function (data) {
+socket.on(INCOMMING_EVENTS.CHAT_MESSAGE, function (data) {
   addNewMessage({ user: data.nick, message: data.message });
 });
 
 
 inputField.addEventListener("keyup", () => {
-    socket.emit("typing", {
+    socket.emit(OUTGOING_EVENTS.TYPING, {
       isTyping: inputField.value.length > 0,
       nick: userName,
     });
+
   });
 
-  socket.on("typing", function (data) {
+  socket.on(INCOMMING_EVENTS.TYPING, function (data) {
     const { isTyping, nick } = data;
   
     if (!isTyping) {
