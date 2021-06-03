@@ -30,6 +30,8 @@ const SOCKET_EVENTS = {
    DISCONNECT: 'disconnect'
 }
 
+
+
 const PORT = process.env.PORT || 5000;
 const app = express();
 
@@ -85,39 +87,41 @@ io.on(SOCKET_EVENTS.CONNECTION, function (socket) {
 
 
 
-  // // fetch existing users
-  // const users = [];
-  // for (let [id, socket] of io.of("/").sockets) {
-  //   users.push({
-  //     userID: id,
-  //     username: socket.username,
-  //   });
-  // }
-  // socket.emit(BC_EVENTS.ALL_USERS, users);
+  // fetch existing users
+  const users = [];
+  for (let [id, socket] of io.of("/").sockets) {
+    users.push({
+      userID: id,
+      username: socket.username,
+    });
+  }
+  socket.emit(BC_EVENTS.ALL_USERS, users);
 
-  // // notify existing users
-  // socket.broadcast.emit(BC_EVENTS.USER_CONNECTED, {
-  //   userID: socket.id,
-  //   username: socket.username,
-  // });
+  // notify existing users
+  socket.broadcast.emit(BC_EVENTS.USER_CONNECTED, {
+    userID: socket.id,
+    username: socket.username,
+  });
 
   // forward the private message to the right recipient
+
+  
   socket.on("private message", ({ content, to }) => {
     socket.to(to).emit("private message", {
       content,
-      from: socket.username,
+      from: socket.id,
     });
   });
 
 
 
 
-  socket.on(INCOMMING_EVENTS.NEW_USER, function (data) {
-    log(data)
-    socket.userId = data;
-    activeUsers.add(data);
-    io.emit(BC_EVENTS.NEW_USER, [...activeUsers]);
-  });
+  // socket.on(INCOMMING_EVENTS.NEW_USER, function (data) {
+  //   log(data)
+  //   socket.userId = data;
+  //   activeUsers.add(data);
+  //   io.emit(BC_EVENTS.NEW_USER, [...activeUsers]);
+  // });
 
   socket.on(SOCKET_EVENTS.DISCONNECT, () => {
     activeUsers.delete(socket.userId);
