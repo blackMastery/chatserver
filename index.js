@@ -3,6 +3,36 @@ const socket = require("socket.io");
 const cors = require("cors");
 const { log } = require("console");
 
+// TODO: DEFINE EVENTS AS CONTRACTS (operation)
+/*
+{
+  "type": "create-new-game",
+  "payload": {
+    "username": "SomeUsername"
+  }
+}
+*/
+
+// TODO: Each operation should have a single handler assigned
+
+/*
+class CreateNewGameHandler {
+  constructor(games) {
+    this.games = games;
+  }
+
+  handle(message) {
+    // handler implementation
+  }
+}
+
+CreateNewGameHandler.TYPE = "create-new-game";
+
+module.exports = CreateNewGameHandler;
+*/
+
+
+
 // App setup
 const INCOMMING_EVENTS = {
   NEW_USER: 'NEW_USER',
@@ -57,6 +87,7 @@ const io = socket(server, {
 
 io.use((socket, next) => {
   const username = socket.handshake.auth.username;
+  console.log({username})
   if (!username) {
     return next(new Error("invalid username"));
   }
@@ -106,8 +137,8 @@ io.on(SOCKET_EVENTS.CONNECTION, function (socket) {
   // forward the private message to the right recipient
 
   
-  socket.on("private message", ({ content, to }) => {
-    socket.to(to).emit("private message", {
+  socket.on(INCOMMING_EVENTS.PRIVATE_MESSAGE, ({ content, to }) => {
+    socket.to(to).emit(OUTGOING_EVENTS.PRIVATE_MESSAGE, {
       content,
       from: socket.id,
     });
@@ -125,7 +156,7 @@ io.on(SOCKET_EVENTS.CONNECTION, function (socket) {
 
   socket.on(SOCKET_EVENTS.DISCONNECT, () => {
     activeUsers.delete(socket.userId);
-    io.emit(BC_EVENTS.USER_DISCONNECTED, socket.userId);
+    io.emit(BC_EVENTS.USER_DISCONNECTED, socket.username);
   });
 
 
