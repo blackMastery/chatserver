@@ -16,7 +16,7 @@ jobs:
       with:
         url: 'https://api.cherimoya.io/auth/login'
         method: 'POST'
-        email: 'admin@admin2.com'
-        password: 'password'
+        email: "admin@admin2.com"
+        password: "password"
     - name: Show Response
       run: echo ${{ steps.myRequest.outputs.response }}
